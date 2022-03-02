@@ -38,15 +38,18 @@ def main():
     reloj = p.time.Clock()
     screen.fill(p.Color("white"))
     ej = Maquinaria.EstadoJuego()
+    movimientosValidos = ej.esMovimientoValido()
+    movimientoHecho = False # variable Flag para verificar si el movimiento es valido
     cargarImagenes() # Solo se hace una vez
 
     corriendo = True
-    cuadSelec = () #Ningun cuadrado seleccionado, mantiene el registro de el ultimo click del usuario, tupla (fil, col)
-    clickJugador = [] #Mantiene el registro de los clicks de usuario [(fil1, col1),(fil2, col2)]
+    cuadSelec = () # Ningun cuadrado seleccionado, mantiene el registro de el ultimo click del usuario, tupla (fil, col)
+    clickJugador = [] # Mantiene el registro de los clicks de usuario [(fil1, col1),(fil2, col2)]}
     while corriendo:
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
+            # Eventos de mouse
             elif e.type == p.MOUSEBUTTONDOWN:
                 location = p.mouse.get_pos()  # coordenadas (x, y)
                 col = location[0] // TAMANO_CUAD
@@ -61,9 +64,21 @@ def main():
                 if len(clickJugador) == 2: #despues del segundo click.
                     movimiento = Maquinaria.Mover(clickJugador[0], clickJugador[1], ej.tablero)
                     print(movimiento.obtenerNotacion())
-                    ej.mueve(movimiento)
+                    if movimiento in movimientosValidos:
+                        ej.mueve(movimiento)
+                        movimientoHecho = True
                     cuadSelec = () # Reinicia la jugada
                     clickJugador = []
+
+            # Controlador teclado
+            elif e.type == p.KEYDOWN:
+                if e.key == p.K_z: # deshacer cuando presiona "z"
+                    ej.deshacer()
+                    movimientoHecho = True
+
+        if movimientoHecho:
+            movimientosValidos = ej.esMovimientoValido()
+            movimientoHecho = False
 
         dibujarEstadoJuego(screen, ej)
         reloj.tick(MAX_FPS)

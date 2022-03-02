@@ -21,12 +21,60 @@ class EstadoJuego():
         ]
         self.mueveBlanco = True
         self.registroMov = []
-
+    """
+    Toma un movimiento como parámetro y lo ejecuta. No sirve para enrocar, coronar ni --
+    """
     def mueve(self, mover):
         self.tablero[mover.filInicio][mover.colInicio] = "--"
         self.tablero[mover.filFinal][mover.colFinal] = mover.piezaMovida
-        self.registroMov.append(mover) #Guarda el movimiento para des hacerlo o verlo en el futuro
+        self.registroMov.append(mover)  # Guarda el movimiento para des hacerlo o verlo en el futuro
         self.mueveBlanco = not self.mueveBlanco
+
+    """
+    Deshace el último movimiento
+    """
+    def deshacer(self):
+        if len(self.registroMov) != 0:  # Asegura que hay al menos un movimiento que deshacer
+            mover = self.registroMov.pop()
+            self.tablero[mover.filInicio][mover.colInicio] = mover.piezaMovida
+            self.tablero[mover.filFinal][mover.colFinal] = mover.piezaCapturada
+            self.mueveBlanco = not self.mueveBlanco
+
+    """
+    Todos los movimientos incluyendo cuando el rey está en jaque
+    """
+    def esMovimientoValido(self):
+        return self.esPosibleMovimiento() # Por el momento no nos vamos a preocupar por esta función.
+
+    """
+    Todos los movimientos sin considerar jaques
+    """
+    def esPosibleMovimiento(self):
+        movimientos = [Mover((6,4), (4,4), self.tablero)]
+        for fila in range(len(self.tablero)):
+            for columna in range(len(self.tablero[fila])):
+                turno = self.tablero[fila][columna][1]
+                if (turno == "b" and self.mueveBlanco) and (turno == "n" and not self.mueveBlanco):
+                    pieza = self.tablero[fila][columna][0]
+                    if pieza == 'P':
+                        self.obtenMovimientoPeon(fila, columna, movimientos)
+                    elif pieza == 'T':
+                        self.obtenMovimientoTorre(fila, columna, movimientos)
+        return movimientos
+
+    """
+    Obtiene el movimiento de los peones.
+    """
+    def obtenerMovimientoPeon(self, f, c, movimientos):
+        pass
+
+    """
+    Obtiene el movimiento de las torres.
+    """
+    def obtenerMovimientoTorre(self, f, c, movimientos):
+        pass
+
+
 
 
 class Mover():
@@ -51,6 +99,18 @@ class Mover():
 
         self.piezaMovida = tablero[self.filInicio][self.colInicio]
         self.piezaCapturada = tablero[self.filFinal][self.colFinal]
+        self.idMovimiento = self.filInicio * 1000 + self.colInicio * 100 + self.filFinal * 10 + self.colFinal
+        print(self.idMovimiento)
+
+    """
+    Override el metodo igual, por lo que usamos una clase para mover, toca hacer esto
+    """
+
+    def __eq__(self, otro):
+        if isinstance(otro, Mover):
+            return self.idMovimiento == otro.idMovimiento
+        return False
+
 
     def obtenerNotacion(self):
         return (
