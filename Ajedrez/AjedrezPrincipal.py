@@ -29,7 +29,7 @@ def cargarImagenes():
 
 
 """
-Este es el operador principal del código.
+Este es el operador p rincipal del código.
 Va a manejar la interacción con usuario y actualizar las gráficas.
 """
 

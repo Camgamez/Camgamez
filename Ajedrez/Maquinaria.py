@@ -3,6 +3,7 @@ Esta clase es responsable de guardar toda la información sobre el estado actual
 de determinar si el movimiento es válido y va a mantener un registro de los movimientos.
 """
 
+
 class EstadoJuego():
     def __init__(self):
         # El tablero es in arreglo bi-dimensional 8x8. Cada elemento de la lista tiene dos caracteres.
@@ -15,15 +16,17 @@ class EstadoJuego():
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["--", "--", "--", "--", "--", "--", "--", "--"],
-            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "Pn", "--", "--", "--", "--"],
             ["Pb", "Pb", "Pb", "Pb", "Pb", "Pb", "Pb", "Pb"],
             ["Tb", "Cb", "Ab", "Db", "Rb", "Ab", "Cb", "Tb"]
         ]
         self.mueveBlanco = True
         self.registroMov = []
+
     """
     Toma un movimiento como parámetro y lo ejecuta. No sirve para enrocar, coronar ni --
     """
+
     def mueve(self, mover):
         self.tablero[mover.filInicio][mover.colInicio] = "--"
         self.tablero[mover.filFinal][mover.colFinal] = mover.piezaMovida
@@ -33,6 +36,7 @@ class EstadoJuego():
     """
     Deshace el último movimiento
     """
+
     def deshacer(self):
         if len(self.registroMov) != 0:  # Asegura que hay al menos un movimiento que deshacer
             mover = self.registroMov.pop()
@@ -43,18 +47,20 @@ class EstadoJuego():
     """
     Todos los movimientos incluyendo cuando el rey está en jaque
     """
+
     def esMovimientoValido(self):
-        return self.esPosibleMovimiento() # Por el momento no nos vamos a preocupar por esta función.
+        return self.esPosibleMovimiento()  # Por el momento no nos vamos a preocupar por esta función.
 
     """
     Todos los movimientos sin considerar jaques
     """
+
     def esPosibleMovimiento(self):
-        movimientos = [Mover((6,4), (4,4), self.tablero)]
+        movimientos = []
         for fila in range(len(self.tablero)):
             for columna in range(len(self.tablero[fila])):
                 turno = self.tablero[fila][columna][1]
-                if (turno == "b" and self.mueveBlanco) and (turno == "n" and not self.mueveBlanco):
+                if (turno == "b" and self.mueveBlanco) or (turno == "n" and not self.mueveBlanco):
                     pieza = self.tablero[fila][columna][0]
                     if pieza == 'P':
                         self.obtenMovimientoPeon(fila, columna, movimientos)
@@ -65,16 +71,25 @@ class EstadoJuego():
     """
     Obtiene el movimiento de los peones.
     """
-    def obtenerMovimientoPeon(self, f, c, movimientos):
-        pass
 
+    def obtenMovimientoPeon(self, f, c, movimientos):
+        if self.mueveBlanco:  # Mueve peon blanco.
+            if self.tablero[f - 1][c] == "--": # Avanza una casilla
+                movimientos.append(Mover((f, c), (f - 1, c), self.tablero))
+                if f == 6 and self.tablero[f - 2][c] == "--":
+                    movimientos.append(Mover((f, c), (f - 2, c), self.tablero))
+            if c-1 >= 0:
+                if self.tablero[f-1][c-1][1] == 'n':
+                    movimientos.append(Mover((f, c), (f - 1, c -1), self.tablero))
+            if c + 1 < 7:
+                if self.tablero[f-1][c+1][1] == 'n':
+                    movimientos.append(Mover((f, c), (f - 1, c + 1), self.tablero))
     """
     Obtiene el movimiento de las torres.
     """
-    def obtenerMovimientoTorre(self, f, c, movimientos):
+
+    def obtenMovimientoTorre(self, f, c, movimientos):
         pass
-
-
 
 
 class Mover():
@@ -110,7 +125,6 @@ class Mover():
         if isinstance(otro, Mover):
             return self.idMovimiento == otro.idMovimiento
         return False
-
 
     def obtenerNotacion(self):
         return (
